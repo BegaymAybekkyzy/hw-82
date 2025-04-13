@@ -1,5 +1,5 @@
 import express from "express";
-import {IArtistMutation} from "../types";
+import {IArtist, IArtistMutation} from "../types";
 import {imagesUpload} from "../multer";
 import Artist from "../model/Artist";
 
@@ -7,7 +7,7 @@ const artistRouter = express.Router();
 
 artistRouter.get("/", async (req, res, next) => {
     try {
-        const artist = await Artist.find();
+        const artist: IArtist[] = await Artist.find();
         res.send(artist);
     } catch (err) {
         next(err);
@@ -16,7 +16,7 @@ artistRouter.get("/", async (req, res, next) => {
 
 artistRouter.post("/", imagesUpload.single("photo"), async (req, res, next) => {
     try {
-        if (!req.body.name) {
+        if (!req.body.name?.trim()) {
             res.status(400).send({error: "Name is required"});
             return;
         }

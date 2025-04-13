@@ -5,5 +5,16 @@ export interface IArtistMutation {
 }
 
 export interface IArtist extends IArtistMutation {
-    id: string;
+    _id: string;
+}
+
+export interface IAlbumMutation {
+    artist: string;
+    title: string;
+    album_year: number;
+    cover?: string | null;
+}
+
+export interface IAlbum extends IAlbumMutation {
+    _id: string;
 }
