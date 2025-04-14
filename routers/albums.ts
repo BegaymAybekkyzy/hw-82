@@ -7,21 +7,21 @@ const albumRouter = express.Router();
 
 albumRouter.get("/", async (req, res, next) => {
     const artistId = req.query.artist as string;
-    let albums: IAlbum[];
+    let albums;
 
     if (artistId) {
-        albums = await Album.find({artist: artistId});
+        albums = await Album.find({artist: artistId}).populate("artist");
         res.send(albums);
         return;
     }
-    albums = await Album.find();
+    albums = await Album.find().populate("artist");
     res.send(albums);
 });
 
 albumRouter.post("/", imagesUpload.single("cover"), async (req, res, next) => {
    try {
        if (!req.body.artist?.trim() || !req.body.album_year?.trim() || !req.body.title?.trim()) {
-           res.status(400).send({error: "All fields are required and must not be blank"});
+           res.status(400).send({error: "Fields are mandatory and must not be empty"});
            return;
        }
 

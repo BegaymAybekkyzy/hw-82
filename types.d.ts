@@ -9,7 +9,7 @@ export interface IArtist extends IArtistMutation {
 }
 
 export interface IAlbumMutation {
-    artist: string;
+    artist: string | IArtist;
     title: string;
     album_year: number;
     cover?: string | null;
@@ -17,4 +17,10 @@ export interface IAlbumMutation {
 
 export interface IAlbum extends IAlbumMutation {
     _id: string;
+}
+
+export interface ITrackMutation {
+    title: string;
+    album: string;
+    duration?: string;
 }

@@ -5,6 +5,7 @@ const albumSchema = new mongoose.Schema({
     artist: {
         type: Schema.Types.ObjectId,
         required: true,
+        ref: "Artist",
         validate: {
             validator: async (value: Types.ObjectId) =>{
                 const artist = await Artist.findOne(value)

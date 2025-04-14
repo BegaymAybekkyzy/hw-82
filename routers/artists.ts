@@ -23,7 +23,7 @@ artistRouter.post("/", imagesUpload.single("photo"), async (req, res, next) => {
 
         const newArtist: IArtistMutation = {
             name: req.body.name,
-            info: req.body.info,
+            info: req.body.info ? req.body.info : null,
             photo: req.file ? "photos/" + req.file.filename : null,
         }
 
