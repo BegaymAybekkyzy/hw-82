@@ -4,18 +4,18 @@ export interface IArtistMutation {
     photo?: string | null;
 }
 
-export interface IArtist extends IArtistMutation {
+export interface IArtist  {
     _id: string;
 }
 
 export interface IAlbumMutation {
-    artist: string | IArtist;
+    artist: string ;
     title: string;
     album_year: number;
     cover?: string | null;
 }
 
-export interface IAlbum extends IAlbumMutation {
+export interface IAlbum  {
     _id: string;
 }
 

@@ -15,7 +15,8 @@ const trackSchema = new mongoose.Schema({
             validator: async (value: Types.ObjectId) =>{
                 const album = await Album.findOne(value)
                 return !!album
-            }
+            },
+            message: "Album not found"
         }
     },
     duration: String,

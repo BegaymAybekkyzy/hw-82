@@ -1,13 +1,13 @@
 import express from "express";
-import {IArtist, IArtistMutation} from "../types";
 import {imagesUpload} from "../multer";
 import Artist from "../model/Artist";
+import {Error} from "mongoose";
 
 const artistRouter = express.Router();
 
-artistRouter.get("/", async (req, res, next) => {
+artistRouter.get("/", async (_req, res, next) => {
     try {
-        const artist: IArtist[] = await Artist.find();
+        const artist = await Artist.find();
         res.send(artist);
     } catch (err) {
         next(err);
@@ -16,22 +16,28 @@ artistRouter.get("/", async (req, res, next) => {
 
 artistRouter.post("/", imagesUpload.single("photo"), async (req, res, next) => {
     try {
-        if (!req.body.name?.trim()) {
+        const {name, info} = req.body;
+
+        if (!name?.trim()) {
             res.status(400).send({error: "Name is required"});
             return;
         }
 
-        const newArtist: IArtistMutation = {
-            name: req.body.name,
-            info: req.body.info ? req.body.info : null,
+        const newArtist = new Artist({
+            name,
+            info,
             photo: req.file ? "photos/" + req.file.filename : null,
-        }
+        });
 
-        const artist = new Artist(newArtist);
-        await artist.save();
-        res.send(artist);
-    } catch (err) {
-        next(err)
+        await newArtist.save();
+        res.send(newArtist);
+    } catch (error) {
+
+        if (error instanceof Error.ValidationError || error instanceof Error.CastError) {
+            res.status(400).send(error);
+            return;
+        }
+        next(error);
     }
 });
 

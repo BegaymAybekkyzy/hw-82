@@ -1,60 +1,48 @@
 import express from "express";
 import Album from "../model/Album";
-import {ITrackMutation} from "../types";
 import Track from "../model/Track";
+import {Error} from "mongoose";
 
 const trackRouter = express.Router();
 
 trackRouter.get("/", async (req, res, next) => {
-   try {
-       const albumId = req.query.album as string;
-       const artistId = req.query.artist as string;
-       let tracks;
+    try {
+        const {album, artist} = req.query;
+        let filter = {};
 
-       if (albumId) {
-           tracks = await Track.find({album: albumId}).populate("album");
-           res.send(tracks);
-           return;
-       }
+        if(album) {
+            filter = {album};
+        } else if(artist) {
+            const albums = await Album.find({artist});
+            const albumsIds = albums.map(album => album.id);
+            filter = {album: {$in: albumsIds}};
+        }
 
-       if (artistId) {
-           const albums = await Album.find({artist: artistId});
-           const allTracks = [];
-
-           for (const album of albums) {
-               const tracks = await Track.find({album: album._id}).populate("album");
-               allTracks.push(...tracks);
-           }
-
-           res.send(allTracks);
-           return;
-       }
-
-       tracks = await Track.find().populate("album");
-       res.send(tracks);
-   } catch (err) {
-       next(err);
-   }
+        const tracks = await Track.find(filter);
+        res.send(tracks);
+    } catch (err) {
+        next(err);
+    }
 });
 
 trackRouter.post("/", async (req, res, next) => {
     try {
-        if (!req.body.album?.trim() || !req.body.title?.trim()) {
-            res.status(400).send({error: "Fields are mandatory and must not be empty"});
+        const {album, title, duration} = req.body;
+
+        const newTrack = new Track({
+            album,
+            title,
+            duration,
+        });
+
+        await newTrack.save();
+        res.send(newTrack);
+    } catch (error) {
+        if (error instanceof Error.ValidationError || error instanceof Error.CastError) {
+            res.status(400).send(error);
             return;
         }
-
-        const newTrack: ITrackMutation = {
-            album: req.body.album,
-            title: req.body.title,
-            duration: req.body.duration ? req.body.duration : null,
-        };
-
-        const track = new Track(newTrack);
-        await track.save();
-        res.send(newTrack);
-    } catch (err) {
-        next(err);
+        next(error);
     }
 });
 
