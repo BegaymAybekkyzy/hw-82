@@ -4,7 +4,7 @@ import albumRouter from "./routers/albums";
 import trackRouter from "./routers/tracks";
 import * as mongoose from "mongoose";
 import userRouter from "./routers/users";
-import track_historyRouter from "./routers/track_history";
+import trackHistoryRouter from "./routers/trackHistory";
 
 const app = express();
 const port = 8000;
@@ -14,7 +14,7 @@ app.use("/artists", artistRouter);
 app.use("/albums", albumRouter);
 app.use("/tracks", trackRouter);
 app.use("/users", userRouter);
-app.use("/track_history", track_historyRouter);
+app.use("/track_history", trackHistoryRouter);
 app.use(express.static("public"));
 
 const run = async () => {

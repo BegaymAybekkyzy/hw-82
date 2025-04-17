@@ -1,6 +1,23 @@
-import mongoose from "mongoose";
+import mongoose, {HydratedDocument, Model} from "mongoose";
+import bcrypt from "bcrypt";
+import {IUser} from "../types";
+import {randomUUID} from "node:crypto";
 
-const userSchema = new mongoose.Schema({
+interface UserMethods {
+    checkPassword: (password: string) => Promise<boolean>;
+    generateToken(): void;
+}
+
+type UserModel = Model<IUser, {}, UserMethods>
+
+const SALT_WORK_FACTOR = 10;
+
+const UserSchema = new mongoose.Schema<
+    HydratedDocument<IUser>,
+    UserModel,
+    UserMethods,
+    {}
+>({
     username: {
         type: String,
         required: true,
@@ -12,8 +29,34 @@ const userSchema = new mongoose.Schema({
     },
     token: {
         type: String,
+        required: true,
     }
 });
 
-const User = mongoose.model("User", userSchema);
+UserSchema.methods.checkPassword = function (password: string) {
+    const user = this;
+    return bcrypt.compare(password, user.password);
+};
+
+UserSchema.methods.generateToken = function () {
+    this.token = randomUUID();
+}
+
+UserSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
+    const salt = await bcrypt.genSalt(SALT_WORK_FACTOR);
+    const hash = await bcrypt.hash(this.password, salt);
+
+    this.password = hash;
+    next();
+});
+
+UserSchema.set("toJSON", {
+    transform: (_doc, ret) => {
+        delete ret.password;
+        return ret;
+    }
+});
+
+const User = mongoose.model("User", UserSchema);
 export default User;
