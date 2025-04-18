@@ -18,11 +18,6 @@ artistRouter.post("/", imagesUpload.single("photo"), async (req, res, next) => {
     try {
         const {name, info} = req.body;
 
-        if (!name?.trim()) {
-            res.status(400).send({error: "Name is required"});
-            return;
-        }
-
         const newArtist = new Artist({
             name,
             info,

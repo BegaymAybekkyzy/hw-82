@@ -12,6 +12,10 @@ albumRouter.get("/", async (req, res, next) => {
         const albums = await Album.find(filter);
         res.send(albums);
     } catch (error) {
+        if (error instanceof Error.ValidationError || error instanceof Error.CastError) {
+            res.status(400).send(error);
+            return;
+        }
         next(error);
     }
 });
@@ -27,6 +31,10 @@ albumRouter.get("/:id", async (req, res, next) => {
        }
        res.send(album);
    } catch (error) {
+       if (error instanceof Error.ValidationError || error instanceof Error.CastError) {
+           res.status(400).send(error);
+           return;
+       }
        next(error);
    }
 });

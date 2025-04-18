@@ -12,6 +12,7 @@ trackRouter.get("/", async (req, res, next) => {
 
         if(album) {
             filter = {album};
+
         } else if(artist) {
             const albums = await Album.find({artist});
             const albumsIds = albums.map(album => album.id);
@@ -20,8 +21,12 @@ trackRouter.get("/", async (req, res, next) => {
 
         const tracks = await Track.find(filter);
         res.send(tracks);
-    } catch (err) {
-        next(err);
+    } catch (error) {
+        if (error instanceof Error.ValidationError || error instanceof Error.CastError) {
+            res.status(400).send(error);
+            return;
+        }
+        next(error);
     }
 });
 

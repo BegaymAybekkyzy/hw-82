@@ -19,7 +19,10 @@ const trackSchema = new mongoose.Schema({
             message: "Album not found"
         }
     },
-    duration: String,
+    duration: {
+        type: String,
+        default: null,
+    },
 });
 
 const Track = mongoose.model("Track", trackSchema);
